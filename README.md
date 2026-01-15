@@ -1,39 +1,97 @@
-# ⚖️ Legal AI - Assistente Jurídico com RAG
+# ⚖️ Legal AI — RAG Jurídico
 
 Sistema RAG para pesquisa inteligente de jurisprudência e análise de precedentes.
 
 ---
 
-## 💡 Ideia
-
-Advogados gastam horas buscando precedentes manualmente. Este sistema usa RAG (Retrieval-Augmented Generation) para buscar e analisar jurisprudência automaticamente, economizando tempo e aumentando precisão.
-
----
-
-## 🎯 MVP - Funcionalidades
-
-✅ Upload de PDFs jurídicos (decisões, leis, contratos)  
-✅ Busca híbrida (semântica + keywords)  
-✅ Chat inteligente com memória de contexto  
-✅ Citações automáticas com fonte
+## ✅ O que este projeto faz
+- Upload de PDFs jurídicos
+- Indexação em vetores (Chroma)
+- Perguntas com RAG + LLM
+- Respostas com fontes
 
 ---
 
-## 🏗️ Arquitetura
+## 🧱 Arquitetura (visão rápida)
 
 ```
 PDFs → Text Splitter → Embeddings → ChromaDB
                                          ↓
-Pergunta → Busca BM25 + Vetores → RAG → LLM → Resposta + Fonte
+Pergunta → Busca Vetorial → RAG → LLM → Resposta + Fonte
 ```
 
 ---
 
-## 🛠️ Stack Técnico
+## 🧰 Stack
+- Backend: FastAPI + LangChain
+- Vetores: ChromaDB
+- LLM: Groq
+- Frontend: Streamlit
+- Banco: PostgreSQL
 
-- **Backend:** Python + LangChain
-- **Busca:** BM25 + Vector Search
-- **Interface:** Streamlit
 ---
 
-**🔨 Em desenvolvimento - MVP**
+## ⚙️ Variáveis de ambiente
+Crie um .env baseado em [.env.example](.env.example) e preencha:
+
+- `GROQ_API_KEY` (obrigatório)
+- `DATABASE_URL` (já configurado para Docker/local)
+
+---
+
+## ▶️ Como rodar com Docker (recomendado)
+
+Use [docker-compose.yml](docker-compose.yml):
+
+```
+docker compose up -d --build
+```
+
+Acesse:
+- Backend: http://localhost:8000/docs
+- Frontend: http://localhost:8501
+
+---
+
+## ▶️ Como rodar localmente (dev)
+
+1) Instale dependências
+```
+pip install -r requirements.txt
+```
+
+2) Inicie o backend
+```
+uvicorn src.main:app --reload
+```
+
+3) Inicie o frontend
+```
+streamlit run app.py
+```
+
+---
+
+## 🔌 Endpoints principais
+- `POST /carregar/` — upload de PDF
+- `POST /processar/{filename}` — indexar documento
+- `POST /pergunta/` — perguntar ao RAG
+- `GET /documentos/` — listar PDFs
+
+---
+
+## 📁 Estrutura principal
+- Backend: [src/main.py](src/main.py)
+- Frontend: [app.py](app.py)
+- Docker backend: [DockerFile.backend](DockerFile.backend)
+- Docker frontend: [DockerFile.frontend](DockerFile.frontend)
+- Dependências backend: [requirements-backend.txt](requirements-backend.txt)
+- Dependências frontend: [requirements-frontend.txt](requirements-frontend.txt)
+
+---
+
+## ⚠️ Observações
+- Não versionar `.env` (já ignorado em [.gitignore](.gitignore))
+- PDFs ficam em `data/documentos` (ignorado do git)
+
+---
