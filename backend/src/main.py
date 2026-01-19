@@ -21,6 +21,7 @@ from sqlalchemy.orm import Session
 from .database import get_db, create_tables
 from .models import Documento, Conversa, Mensagem
 from .schemas import DocumentoResponse, QueryRequest, QueryResponse
+from .utils import get_vector_count, limpar_chroma_db
 
 # Deixamos o formato simples para o terminal ficar limpo
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
@@ -33,33 +34,6 @@ load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"), override=not 
 # Inicialização dos Modelos de IA
 embeddings = GoogleGenerativeAIEmbeddings(model="text-embedding-004")
 llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
-
-# --- Funções Auxiliares ---
-def _get_vector_count(vector_store):
-    """Retorna a contagem de documentos no Vector Store de forma segura."""
-    try:
-        # Tenta usar a API interna do Chroma (mais rápida)
-        return vector_store._collection.count()
-    except Exception as e:
-        # Se for erro de dimensão, levanta para ser tratado pelo chamador
-        if "dimension" in str(e).lower():
-            raise
-        try:
-            # Fallback para busca vazia (API pública)
-            return len(vector_store.get()['ids'])
-        except Exception:
-            return 0
-
-def _limpar_chroma():
-    """Remove o diretório do ChromaDB se houver erro de compatibilidade."""
-    os.makedirs(CHROMA_DIR, exist_ok=True)
-    logger.warning(f"🧹 Limpando conteúdo do Chroma: {CHROMA_DIR}")
-    for nome in os.listdir(CHROMA_DIR):
-        caminho = os.path.join(CHROMA_DIR, nome)
-        if os.path.isdir(caminho):
-            shutil.rmtree(caminho)
-        else:
-            os.remove(caminho)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -137,7 +111,7 @@ async def processar_documento(filename: str, db: Session = Depends(get_db)):
     if documento_db.preprocessado:
         try:
             vectordb = Chroma(persist_directory=CHROMA_DIR, embedding_function=embeddings)
-            if _get_vector_count(vectordb) > 0:
+            if get_vector_count(vectordb) > 0:
                 return {
                     "message": "Documento já processado e verificado.",
                     "filename": filename,
@@ -182,7 +156,7 @@ async def processar_documento(filename: str, db: Session = Depends(get_db)):
         except Exception as e:
             if "dimension" in str(e).lower():
                 logger.warning("⚠️ Erro de dimensão ao salvar. Limpando e tentando novamente...")
-                _limpar_chroma()
+                limpar_chroma_db()
                 vectordb = Chroma.from_documents(
                     documents=chunks,
                     embedding=embeddings,
@@ -219,11 +193,11 @@ async def responder_pergunta(query: QueryRequest, db: Session = Depends(get_db))
                 embedding_function=embeddings
             )
             # Tenta um count para validar dimensões
-            _get_vector_count(vectordb)
+            get_vector_count(vectordb)
         except Exception as e:
             if "dimension" in str(e).lower():
                 logger.error(f"❌ Erro de dimensão no Chroma: {e}")
-                _limpar_chroma()
+                limpar_chroma_db()
                 raise HTTPException(
                     status_code=400, 
                     detail="A base de dados era incompatível e foi resetada. Por favor, processe o documento novamente."
@@ -232,7 +206,7 @@ async def responder_pergunta(query: QueryRequest, db: Session = Depends(get_db))
             raise HTTPException(status_code=500, detail="Erro ao carregar base de dados. Re-processe o documento.")
 
         # Validar se há documentos na base
-        count = _get_vector_count(vectordb)
+        count = get_vector_count(vectordb)
 
         if count == 0:
             raise HTTPException(status_code=404, detail="Nenhum documento indexado. Por favor, processe um documento primeiro.")
@@ -242,7 +216,7 @@ async def responder_pergunta(query: QueryRequest, db: Session = Depends(get_db))
             docs = vectordb.similarity_search(query.pergunta, k=3)
         except Exception as e:
             if "dimension" in str(e).lower():
-                _limpar_chroma()
+                limpar_chroma_db()
                 raise HTTPException(
                     status_code=400, 
                     detail="Erro de compatibilidade detectado. A base foi limpa. Processe o documento novamente."

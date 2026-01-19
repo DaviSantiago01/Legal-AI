@@ -15,7 +15,7 @@ class Documento(Base):
     nome_arquivo = Column(String, unique=True, nullable=False)
     nome_original = Column(String, nullable=False)
     caminho_arquivo = Column(String, nullable=False)
-    conteudo_binario = Column(LargeBinary, nullable=True) # Campo para salvar o arquivo PDF no banco
+    conteudo_binario = Column(LargeBinary, nullable=True)
     preprocessado = Column(Boolean, default=False)
     numero_chuncks = Column(Integer, default=0)
     criado_em = Column(DateTime, default=datetime.utcnow)
