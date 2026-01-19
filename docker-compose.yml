@@ -13,10 +13,11 @@ services:
   backend:
     build:
       context: .
-      dockerfile: DockerFile.backend
+      dockerfile: backend/Dockerfile
     volumes:
-      - ./src:/app/src
-      - ./data:/app/data
+      - ./backend/src:/app/src
+      - ./backend/data:/app/data
+      - ./backend/chroma_db:/app/chroma_db
     ports:
       - "8000:8000"
     depends_on:
@@ -28,16 +29,17 @@ services:
 
   frontend:
     build:
-      context: .
-      dockerfile: DockerFile.frontend
+      context: ./frontend
+      dockerfile: Dockerfile
     volumes:
-      - ./app.py:/app/app.py
+      - ./frontend:/app
+      - /app/node_modules
     ports:
-      - "8501:8501"
+      - "5173:5173"
     depends_on:
       - backend
     environment:
-      BACKEND_URL: http://backend:8000
+      - VITE_BACKEND_URL=http://localhost:8000
 
 volumes:
   postgres_data:

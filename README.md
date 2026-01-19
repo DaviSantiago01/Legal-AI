@@ -5,6 +5,7 @@ Sistema RAG para pesquisa inteligente de jurisprudência e análise de precedent
 ---
 
 ## ✅ O que este projeto faz
+
 - Upload de PDFs jurídicos
 - Indexação em vetores (Chroma)
 - Perguntas com RAG + LLM
@@ -23,6 +24,7 @@ Pergunta → Busca Vetorial → RAG → LLM → Resposta + Fonte
 ---
 
 ## 🧰 Stack
+
 - Backend: FastAPI + LangChain
 - Vetores: ChromaDB
 - LLM: Groq
@@ -32,6 +34,7 @@ Pergunta → Busca Vetorial → RAG → LLM → Resposta + Fonte
 ---
 
 ## ⚙️ Variáveis de ambiente
+
 Crie um .env baseado em [.env.example](.env.example) e preencha:
 
 - `GROQ_API_KEY` (obrigatório)
@@ -48,6 +51,7 @@ docker compose up -d --build
 ```
 
 Acesse:
+
 - Backend: http://localhost:8000/docs
 - Frontend: http://localhost:8501
 
@@ -55,24 +59,28 @@ Acesse:
 
 ## ▶️ Como rodar localmente (dev)
 
-1) Instale dependências
+1. Instale dependências
+
 ```
 pip install -r requirements.txt
 ```
 
-2) Inicie o backend
+2. Inicie o backend
+
 ```
-uvicorn src.main:app --reload
+uvicorn backend/src.main:app --reload
 ```
 
-3) Inicie o frontend
+3. Inicie o frontend
+
 ```
-streamlit run app.py
+streamlit run frontend/app.py
 ```
 
 ---
 
 ## 🔌 Endpoints principais
+
 - `POST /carregar/` — upload de PDF
 - `POST /processar/{filename}` — indexar documento
 - `POST /pergunta/` — perguntar ao RAG
@@ -81,17 +89,18 @@ streamlit run app.py
 ---
 
 ## 📁 Estrutura principal
-- Backend: [src/main.py](src/main.py)
-- Frontend: [app.py](app.py)
-- Docker backend: [DockerFile.backend](DockerFile.backend)
-- Docker frontend: [DockerFile.frontend](DockerFile.frontend)
-- Dependências backend: [requirements-backend.txt](requirements-backend.txt)
-- Dependências frontend: [requirements-frontend.txt](requirements-frontend.txt)
+
+- Backend: [backend/src/main.py](backend/src/main.py)
+- Frontend: [frontend/app.py](frontend/app.py)
+- Docker backend: [backend/Dockerfile](backend/Dockerfile)
+- Docker frontend: [frontend/Dockerfile](frontend/Dockerfile)
+- Dependências: [requirements.txt](requirements.txt)
 
 ---
 
 ## ⚠️ Observações
+
 - Não versionar `.env` (já ignorado em [.gitignore](.gitignore))
-- PDFs ficam em `data/documentos` (ignorado do git)
+- PDFs ficam em `backend/data/documentos` (ignorado do git)
 
 ---

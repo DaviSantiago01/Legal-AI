@@ -1,6 +1,7 @@
 .env
 .venv/
-chroma_db/
-data/documentos/
+backend/chroma_db/
+backend/data/documentos/
 __pycache__/
 *.pyc
+*.db
