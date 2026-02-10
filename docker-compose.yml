@@ -1,3 +1,4 @@
+name: projeto_rag
 services:
   postgres:
     image: postgres:15
@@ -13,11 +14,11 @@ services:
   backend:
     build:
       context: .
-      dockerfile: backend/Dockerfile
+      dockerfile: Dockerfile
     volumes:
-      - ./backend/src:/app/src
-      - ./backend/data:/app/data
-      - ./backend/chroma_db:/app/chroma_db
+      - ./backend:/app/backend
+      - ./data:/app/data
+      - ./chroma_db:/app/chroma_db
     ports:
       - "8000:8000"
     depends_on:
@@ -26,20 +27,24 @@ services:
       - .env
     environment:
       DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/legal_ai
+    command: python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
 
   frontend:
     build:
-      context: ./frontend
+      context: .
       dockerfile: Dockerfile
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - ./frontend:/app/frontend
+      - ./app.py:/app/app.py
     ports:
-      - "5173:5173"
+      - "8501:8501"
     depends_on:
       - backend
+    env_file:
+      - .env
     environment:
-      - VITE_BACKEND_URL=http://localhost:8000
+      BACKEND_URL: http://backend:8000
+    command: streamlit run app.py --server.port 8501 --server.address 0.0.0.0
 
 volumes:
   postgres_data:
