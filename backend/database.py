@@ -1,32 +1,30 @@
-import os
 import logging
-from dotenv import load_dotenv
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from .config import load_env
 
 # Configuração de Logs
 logger = logging.getLogger(__name__)
-
-# Carregar variáveis de ambiente
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env"), encoding="utf-8")
+load_env()
 
 # Configuração da URL do Banco de Dados 
 DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL não configurada")
 
 # Inicialização do Engine 
 # (Engine é a interface de comunicação com o banco de dados)
 engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True,  # Verifica conexões antes de usar
-    connect_args={"connect_timeout": 5},
+    connect_args={"connect_timeout": 5}, # Timeout de conexão em segundos
     pool_size=5,  # Número de conexões mantidas no pool
     max_overflow=10  # Conexões extras permitidas além do pool_size
 )
 
 # Criação da Sessão Local
-# (SessionLocal é uma factory que cria sessões de banco de dados)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Base para Models
