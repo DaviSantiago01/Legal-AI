@@ -1,7 +1,11 @@
 .env
 .venv/
-backend/chroma_db/
-backend/data/documentos/
+chroma_db/
+data/documentos/
 __pycache__/
 *.pyc
 *.db
+
+node_modules/
+dist/
+.env.local

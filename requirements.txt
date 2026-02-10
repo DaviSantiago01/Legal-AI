@@ -8,13 +8,12 @@ langchain-community
 langchain-text-splitters
 langchain-google-genai
 google-genai
-filetype
 langchain-groq
 chromadb
 pypdf
-rank-bm25
 streamlit
 requests
 sqlalchemy
 psycopg[binary]
-alembic
+passlib[bcrypt]
+python-jose[cryptography]
