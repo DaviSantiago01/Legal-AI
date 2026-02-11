@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from .config import load_env, get_cors_origins
 from .database import create_tables
-from .routers import auth, documentos, rag, conversas
+from .routers import auth_router, documentos_router, rag_router, conversas_router
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Projeto RAG", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=get_cors_origins(), allow_methods=["*"], allow_headers=["*"])
-app.include_router(auth.router)
-app.include_router(documentos.router)
-app.include_router(rag.router)
-app.include_router(conversas.router)
+app.include_router(auth_router)
+app.include_router(documentos_router)
+app.include_router(rag_router)
+app.include_router(conversas_router)
