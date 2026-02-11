@@ -17,3 +17,4 @@ sqlalchemy
 psycopg[binary]
 passlib[bcrypt]
 python-jose[cryptography]
+alembic

@@ -12,7 +12,7 @@ load_env()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    create_tables()
+    # As tabelas agora são gerenciadas via Alembic migrations
     yield   
 
 app = FastAPI(title="Projeto RAG", lifespan=lifespan)
